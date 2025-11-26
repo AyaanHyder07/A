@@ -1,0 +1,246 @@
+18.Create a Spring Boot application using Spring Data JPA to manage students with 
+fields: studentId, studentName, and studentAddress. 
+ 
+=> Student.java 
+package com.infy.domain; 
+ 
+import com.infy.dto.StudentDTO; 
+import jakarta.persistence.Entity; 
+import jakarta.persistence.Id; 
+ 
+@Entity 
+public class Student { 
+ @Id 
+ private Integer studentId; 
+ private String studentName; 
+ private String  StudentAddress; 
+  
+ public Student() { 
+  super(); 
+ } 
+ public Student(int studentId, String studentName, String studentAddress) { 
+  this.studentId = studentId; 
+  this.studentName = studentName; 
+  StudentAddress = studentAddress; 
+ } 
+ public int getStudentId() { 
+  return studentId; 
+ } 
+ public void setStudentId(int studentId) { 
+  this.studentId = studentId; 
+ } 
+ public String getStudentName() { 
+  return studentName; 
+ } 
+ public void setStudentName(String studentName) { 
+  this.studentName = studentName; 
+ } 
+ public String getStudentAddress() { 
+  return StudentAddress; 
+ } 
+ public void setStudentAddress(String studentAddress) { 
+  StudentAddress = studentAddress; 
+ } 
+ @Override 
+ public String toString() { 
+43 
+ 
+  return "Student [" + (studentId != null ? "studentId=" + studentId + ", " : "") 
+   + (studentName != null ? "studentName=" + studentName + ", " : "") 
+    + (StudentAddress != null ? "StudentAddress=" + StudentAddress : 
+"") + "]"; 
+ } 
+  
+ public static StudentDTO convertEntityToDto(Student student) { 
+  StudentDTO studentDTO=new StudentDTO(); 
+  studentDTO.setStudentId(student.getStudentId()); 
+  studentDTO.setStudentName(student.getStudentName()); 
+  studentDTO.setStudentAddress(student.getStudentAddress()); 
+ 
+  return studentDTO; 
+ } 
+} 
+ 
+StudentDTO.java 
+package com.infy.dto; 
+ 
+import com.infy.domain.Student; 
+public class StudentDTO { 
+ private Integer studentId; 
+ private String studentName; 
+ private String  StudentAddress; 
+ public StudentDTO() { 
+  super(); 
+   
+ } 
+ public StudentDTO(int studentId, String studentName, String studentAddress) { 
+  this.studentId = studentId; 
+  this.studentName = studentName; 
+  StudentAddress = studentAddress; 
+ } 
+ public int getStudentId() { 
+  return studentId; 
+ } 
+ public void setStudentId(int studentId) { 
+  this.studentId = studentId; 
+ } 
+ public String getStudentName() { 
+  return studentName; 
+ } 
+ public void setStudentName(String studentName) { 
+  this.studentName = studentName; 
+ } 
+public String getStudentAddress() { 
+return StudentAddress; 
+} 
+public void setStudentAddress(String studentAddress) { 
+StudentAddress = studentAddress; 
+} 
+public static Student convertDtoToEntity(StudentDTO studentDTO) { 
+Student student=new Student(); 
+student.setStudentId(studentDTO.getStudentId()); 
+student.setStudentName(studentDTO.getStudentName()); 
+student.setStudentAddress(studentDTO.getStudentAddress()); 
+return student; 
+} 
+} 
+StudentRepository.java 
+package com.infy.repo; 
+import org.springframework.data.jpa.repository.JpaRepository; 
+import com.infy.domain.Student; 
+public interface StudentRepository extends JpaRepository<Student,Integer> { 
+} 
+StudentService.java 
+package com.infy.service; 
+import java.util.List; 
+import com.infy.dto.StudentDTO; 
+public interface StudentService { 
+public void insertStudent(StudentDTO studentDTO); 
+public List<StudentDTO> getALLStudent(); 
+public void deleteStudent(int studentId); 
+public String updateStudent(int studentId, String newName); 
+} 
+StudentServiceImpl.java 
+package com.infy.service; 
+import java.util.ArrayList; 
+import java.util.List; 
+44 
+45 
+ 
+import java.util.Optional; 
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.stereotype.Service; 
+import com.infy.domain.Student; 
+import com.infy.dto.StudentDTO; 
+import com.infy.repo.StudentRepository; 
+ 
+@Service("employeeService") 
+ 
+public class StudentServiceImpl implements StudentService { 
+  @Autowired 
+  StudentRepository repository; 
+   
+  public void insertStudent(StudentDTO studentDTO) { 
+   Student student=new Student(); 
+   student=StudentDTO.convertDtoToEntity(studentDTO); 
+   repository.save(student); 
+  } 
+  public List<StudentDTO> getALLStudent(){ 
+   List<Student> std=repository.findAll(); 
+   List<StudentDTO> dto=new ArrayList<>(); 
+   for(Student s:std) { 
+    dto.add(Student.convertEntityToDto(s)); 
+   } 
+   return dto; 
+  } 
+  public void deleteStudent(int studentId) { 
+   repository.deleteById(studentId); 
+  } 
+   
+  public String updateStudent(int studentId, String newName) { 
+   Optional<Student> optional=repository.findById(studentId); 
+   Student student=optional.get(); 
+   student.setStudentName(newName); 
+   repository.save(student); 
+   return "The student with id:" + studentId + " has been updated successfully"; 
+  } 
+}  
+ 
+ 
+App.java 
+package com.infy; 
+ 
+import java.util.ArrayList; 
+import org.springframework.beans.factory.annotation.Autowired; 
+46 
+ 
+import org.springframework.boot.CommandLineRunner; 
+import org.springframework.boot.SpringApplication; 
+import org.springframework.boot.autoconfigure.SpringBootApplication; 
+import com.infy.dto.StudentDTO; 
+import com.infy.service.StudentServiceImpl; 
+import java.util.List; 
+import java.util.Scanner; 
+ 
+@SpringBootApplication 
+public class App implements CommandLineRunner{ 
+ 
+ public static void main(String[] args) { 
+  SpringApplication.run(App.class, args); 
+ } 
+  
+ @Autowired 
+ StudentServiceImpl service; 
+ 
+ @Override 
+ public void run(String... args) throws Exception { 
+  service.insertStudent(new StudentDTO(101,"Alice","123 Main Street")); 
+  service.insertStudent(new StudentDTO(102,"Smith","New York")); 
+  service.insertStudent(new StudentDTO(103, "kevin","963 Ash Circle, Portland,")); 
+  service.insertStudent(new StudentDTO(104,"leo","234 sdf sdc")); 
+   
+  List<StudentDTO> list=new ArrayList<>(); 
+  list=service.getALLStudent();  
+  for(StudentDTO std:list) { 
+   System.out.println(std); 
+  } 
+   
+  Scanner s=new Scanner(System.in); 
+  System.out.println("Enter the student id to delete"); 
+  int studentId1=s.nextInt(); 
+  service.deleteStudent(studentId1); 
+  System.out.println("Enter the student id of the student whose current name has to 
+be update:"); 
+  int studentId2=s.nextInt(); 
+  System.out.println("Enter the new name for the student"); 
+  String newName=s.next(); 
+  String msg=service.updateStudent(studentId2, newName); 
+  System.out.println(msg); 
+  s.close();  
+ } 
+  
+}  
+application.properties 
+spring.application.name=project 
+# Database configuration 
+spring.datasource.url=jdbc:mysql://localhost:3306/jpa 
+spring.datasource.username=root 
+spring.jpa.hibernate.ddl-auto=update 
+# Logging configuration 
+logging.level.root=INFO 
+logging.level.org.springframework=WARN 
+➔ Run The Application: 
+o Open xampp , start Apache  and MySql server .  
+o Create a database named jpa in MySQL. 
+o Add  ‘Spring Data Jpa”  (To work with JPA repositories and database) and “MySql 
+Driver” dependencies while creating a maven project using spring initializr . 
+o Run the App class as a Java Application (right-click > Run As > Java Application). 
+OUTPUT: 
+Enter the student id to delete 
+104 
+Enter the student id of the student whose current name has to be update :                                                                                                                             
+103 
+Enter the new name for the student 
+tom 
+The student with id:103 has been updated successfully 
+➔ The jpa data base is looks like as shown below: 

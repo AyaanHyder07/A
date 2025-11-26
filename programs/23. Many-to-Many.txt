@@ -1,0 +1,180 @@
+23. Many-to-one Mapping Between Student and Book Using Spring Boot JPA 
+App.js 
+package com.infy; 
+ 
+import java.util.Arrays; 
+import java.util.List; 
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.boot.CommandLineRunner; 
+import org.springframework.boot.SpringApplication; 
+import org.springframework.boot.autoconfigure.SpringBootApplication; 
+import com.infy.Entity.Book; 
+import com.infy.Entity.Student; 
+import com.infy.repo.StudentRepo; 
+ 
+@SpringBootApplication 
+public class App implements CommandLineRunner { 
+ 
+    @Autowired 
+    private StudentRepo sr; 
+ 
+    public static void main(String[] args) { 
+        SpringApplication.run(App.class, args); 
+    } 
+ 
+    @Override 
+    public void run(String... args) throws Exception { 
+        // Create Book entities  
+     Book b1 = new Book(1, "learningWithPython", "Python Basics"); 
+     Book b2 = new Book(2, "java", "Java Fundamentals"); 
+     Book b3 = new Book(3, "ds", "Data Structures"); 
+ 
+        // Create students and associate books 
+        Student s1 = new Student(101, "john", b1); 
+        Student s2 = new Student(102, "ram", b2); 
+        Student s3 = new Student(103, "sanvi",b1); 
+        Student s4 = new Student(104, "laxmi",b3); 
+ 
+        // Save students (books will be saved automatically because of cascade) 
+        sr.saveAll(Arrays.asList(s1, s2, s3, s4)); 
+ 
+        // Fetch and print all students with their books 
+        List<Student> sList = sr.findAll(); 
+        for (Student s : sList) 
+63 
+ 
+            System.out.println(s); 
+    } 
+} 
+ 
+Student.js 
+ 
+package com.infy.Entity; 
+ 
+import jakarta.persistence.CascadeType; 
+import jakarta.persistence.Entity; 
+import jakarta.persistence.Id; 
+import jakarta.persistence.ManyToOne; 
+@Entity 
+public class Student { 
+    @Id 
+    private Integer studentId; 
+    private String studentName; 
+    // One student can have many books 
+    @ManyToOne( cascade = { CascadeType.ALL}) 
+    private Book book; 
+ 
+    public Student() { 
+        super(); 
+    } 
+    public Student(Integer studentId, String studentName, Book book) { 
+        super(); 
+        this.studentId=studentId; 
+        this.studentName = studentName; 
+        this.book=book; 
+    } 
+    public Integer getStudentId() { 
+        return studentId; 
+    } 
+    public void setStudentId(Integer studentId) { 
+        this.studentId = studentId; 
+    } 
+    public String getStudentName() { 
+        return studentName; 
+    } 
+    public void setStudentName(String studentName) { 
+        this.studentName = studentName; 
+    } 
+ 
+    public Book getBook() { 
+        return book; 
+64 
+ 
+    } 
+ 
+    public void setBook(Book book) { 
+        this.book = book; 
+    } 
+ 
+    @Override 
+    public String toString() { 
+        return "Student [StudentId=" + studentId + ", StudentName=" + studentName + ", book=" + book 
++ "]"; 
+    } 
+} 
+ 
+Book.js 
+package com.infy.Entity; 
+import jakarta.persistence.Entity; 
+import jakarta.persistence.Id; 
+@Entity 
+public class Book { 
+   @Id 
+    private Integer bookId; 
+    private String title; 
+    private String bookName;   
+ 
+    public Book() { 
+        // Default constructor 
+    } 
+    public Book(Integer bookId, String title, String bookName) { 
+        this.bookId = bookId; 
+        this.title = title; 
+        this.bookName = bookName; 
+     
+ 
+    // Getters and setters 
+    public Integer getBookId() { 
+        return bookId; 
+    } 
+    public void setBookId(Integer bookId) { 
+        this.bookId = bookId; 
+    } 
+ 
+    public String getTitle() { 
+        return title; 
+    } 
+    public void setTitle(String title) { 
+this.title = title; 
+} 
+public String getBookName() { 
+return bookName; 
+} 
+public void setBookName(String bookName) { 
+this.bookName = bookName; 
+} 
+@Override 
+public String toString() { 
+return "Book [bookId=" + bookId + ", title=" + title + ", bookName=" + bookName + "]"; 
+} 
+} 
+BookRepo.js 
+package com.infy.repo; 
+import org.springframework.data.jpa.repository.JpaRepository; 
+import org.springframework.stereotype.Repository; 
+import com.infy.Entity.Book; 
+@Repository 
+public interface BookRepo extends  JpaRepository<Book,Integer>{ 
+} 
+StudentRepo.js 
+package com.infy.repo; 
+import org.springframework.data.jpa.repository.JpaRepository; 
+import org.springframework.stereotype.Repository; 
+import com.infy.Entity.Student; 
+@Repository 
+public interface StudentRepo extends JpaRepository<Student,Integer>{ 
+} 
+Application.properties 
+spring.application.name=ManyToOne 
+spring.datasource.url=jdbc:mysql://localhost:3306/stdBook 
+spring.datasource.username=root 
+spring.jpa.hibernate.ddl-auto=update 
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver 
+spring.jpa.show-sql: true 
+➔ Run The Application: 
+o Open xampp , start Apache  and MySql server .  
+o Create a database named stdBook in MySQL. 
+65 
+o Add  ‘Spring Data Jpa”  (To work with JPA repositories and database) and “MySql 
+Driver” dependencies while creating a maven project using spring initializr . 
+o Run the App class as a Java Application (right-click > Run As > Java Application).

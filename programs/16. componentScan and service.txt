@@ -1,0 +1,49 @@
+16. Implement Spring’s component scanning with @ComponentScan and @Service can be 
+used to automatically detect and configure beans. 
+CustomerService.java 
+package com.infy.service; 
+public interface CustomerService { 
+public String fetchCustomer(int count); 
+public String createCustomer(); 
+} 
+CustomerServiceImpl.java 
+package com.infy.service; 
+import org.springframework.beans.factory.annotation.Value; 
+import org.springframework.stereotype.Service; 
+@Service("customerService") 
+public class CustomerServiceImpl implements CustomerService { 
+@Value("10") 
+private int count; 
+public String fetchCustomer(int count) { 
+return " The no of customers fetched are : " + count; 
+} 
+public String createCustomer() { 
+return "Customer is successfully created"; 
+} 
+} 
+SpringConfiguration .java 
+package com.infy.util; 
+import org.springframework.context.annotation.ComponentScan; 
+import org.springframework.context.annotation.Configuration; 
+@Configuration 
+@ComponentScan(basePackages="com.infy") 
+public class SpringConfiguration { 
+} 
+App.java 
+package com.infy; 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext; 
+import org.springframework.context.support.AbstractApplicationContext; 
+import com.infy.service.CustomerServiceImpl; 
+import com.infy.util.SpringConfiguration; 
+36 
+public class App { 
+public static void main(String[] args) { 
+CustomerServiceImpl service = null; 
+AbstractApplicationContext context = new 
+AnnotationConfigApplicationContext(SpringConfiguration.class); 
+service = (CustomerServiceImpl) context.getBean("customerService"); 
+System.out.println(service.createCustomer()); 
+context.close(); 
+} 
+} 
+Output:  Customer is successfully created 

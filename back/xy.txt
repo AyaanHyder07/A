@@ -1,0 +1,87 @@
+*{
+  margin: 3px;
+  padding: 3px;
+}
+
+.card{
+  height: 250px;
+  /* width: 200px; */
+  background-color: tomato;
+  border:1px solid purple;
+  display:inline-block;
+  padding: 20px;
+  margin: 20px;
+}
+
+#name{
+  text-align: center;
+  font-weight: bold;
+  color: black;
+  
+}
+
+.state{
+  height: 200px;
+  width: 100px;
+  background-color: aqua;
+  text-align: center;
+  
+}
+
+#head{
+  color: cornsilk;
+  font-size: large;
+  font-weight: 900;
+  font-style: italic;
+}
+
+button{
+  background-color:brown;
+  color: aliceblue;
+  
+}
+
+form{
+  display: grid;
+grid-template-columns: repeat(1, 1fr); /* Repeat the number of columns */
+grid-template-rows: repeat(1, 1fr); /* Repeat the number of rows */
+place-items: center; /* Centers the form */
+
+}
+input{
+  width: 95%;
+}
+textarea{
+  width: 95%;
+}
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* left & right */
+  padding: 10px 20px;
+  background-color: #ffff;
+}
+
+.navbar img {
+  height: 60px;
+  
+}
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: black;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  color: #ff4081;
+}
+.home{
+    text-align: center;
+    margin-top: 300px;
+}

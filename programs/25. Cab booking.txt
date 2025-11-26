@@ -1,0 +1,257 @@
+25. Create a Spring Boot app to manage cab bookings with fields: cabId, cabName, cabPhoneNo, 
+and address. Design the entity class, JPA repository, and REST controller for basic CRUD operations. 
+ 
+CabBooking.java 
+package com.infy.domain; 
+ 
+import jakarta.persistence.Entity; 
+import jakarta.persistence.Id; 
+ 
+  
+@Entity  
+public class CabBooking{ 
+ @Id 
+ private Long cabPhoneNo; 
+ private String cabName; 
+ private int  cabId; 
+ private String address; 
+ public CabBooking() { 
+  super(); 
+  // TODO Auto-generated constructor stub 
+ } 
+ public CabBooking(int cabId, String cabName, long cabPhoneNo, String address) { 
+  super(); 
+  this.cabId = cabId; 
+  this.cabName = cabName; 
+  this.cabPhoneNo = cabPhoneNo; 
+  this.address = address; 
+ } 
+ public int getCabId() { 
+  return cabId; 
+ } 
+ public void setCabId(int cabId) { 
+  this.cabId = cabId; 
+ } 
+ public String getCabName() { 
+  return cabName; 
+ } 
+ public void setCabName(String cabName) { 
+  this.cabName = cabName; 
+ } 
+ public long getCabPhoneNo() { 
+  return cabPhoneNo; 
+ } 
+ public void setCabPhoneNo(long cabPhoneNo) { 
+74 
+ 
+  this.cabPhoneNo = cabPhoneNo; 
+ } 
+ public String getAddress() { 
+  return address; 
+ } 
+ public void setAddress(String address) { 
+  this.address = address; 
+ } 
+ @Override 
+ public String toString() { 
+  return "CabBoking [cabId=" + cabId + ", cabName=" + cabName + ", cabPhoneNo=" + 
+cabPhoneNo + ", address=" 
+    + address + "]"; 
+ } 
+  
+  
+   
+} 
+ 
+CabBookingDTO.java 
+package com.infy.dto; 
+ 
+import com.infy.domain.CabBooking; 
+ 
+public class CabBookingDTO { 
+ private Long cabPhoneNo; 
+ private String cabName; 
+ private int  cabId; 
+ private String address; 
+ public CabBookingDTO() { 
+  super(); 
+  // TODO Auto-generated constructor stub 
+ } 
+ public CabBookingDTO(int cabId, String cabName, long cabPhoneNo, String address) { 
+  super(); 
+  this.cabId = cabId; 
+  this.cabName = cabName; 
+  this.cabPhoneNo = cabPhoneNo; 
+  this.address = address; 
+ } 
+ public int getCabId() { 
+  return cabId; 
+ } 
+ public void setCabId(int cabId) { 
+  this.cabId = cabId; 
+75 
+ 
+ } 
+ public String getCabName() { 
+  return cabName; 
+ } 
+ public void setCabName(String cabName) { 
+  this.cabName = cabName; 
+ } 
+ public long getCabPhoneNo() { 
+  return cabPhoneNo; 
+ } 
+ public void setCabPhoneNo(long cabPhoneNo) { 
+  this.cabPhoneNo = cabPhoneNo; 
+ } 
+ public String getAddress() { 
+  return address; 
+ } 
+ public void setAddress(String address) { 
+  this.address = address; 
+ } 
+  
+ public static CabBooking pre(CabBookingDTO cabBookingDTO) { 
+  CabBooking c=new CabBooking(); 
+  c.setCabId(cabBookingDTO.getCabId()); 
+  c.setCabName(cabBookingDTO.getCabName()); 
+  c.setAddress(cabBookingDTO.getAddress()); 
+  c.setCabPhoneNo(cabBookingDTO.getCabPhoneNo()); 
+   
+  return c;  
+ } 
+} 
+ 
+CabBookingRepository.java 
+package com.infy.repo; 
+ 
+import com.infy.domain.CabBooking; 
+import org.springframework.data.repository.CrudRepository; 
+import org.springframework.stereotype.Repository; 
+@Repository  
+public interface CabBookingRepository  extends CrudRepository<CabBooking, Long> { 
+} 
+ 
+CabBookingService.java 
+package com.infy.service; 
+import java.util.List; 
+import com.infy.domain.CabBooking; 
+import com.infy.dto.CabBookingDTO; 
+public interface CabBookingService { 
+public String insert(CabBookingDTO cabBookingDTO); 
+public List<CabBooking> fetch(long cabPhoneNO); 
+public String cancel(int cabId); 
+} 
+CabBookingServiceImpl.java 
+package com.infy.service; 
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.stereotype.Service; 
+import java.util.List; 
+import com.infy.domain.CabBooking; 
+import com.infy.dto.CabBookingDTO; 
+import com.infy.repo.CabBookingRepo; 
+@Service  
+public class CabBookingServiceImpl implements CabBookingService{ 
+@Autowired 
+CabBookingRepository  r;  
+public String insert(CabBookingDTO cabBookingDTO) { 
+CabBooking c=new CabBooking(); 
+c=CabBookingDTO.pre(cabBookingDTO); 
+r.save(c); 
+return "cab with"+cabBookingDTO.getCabId()+"added";  
+}  
+public List<CabBooking> fetch(long cabPhoneNo){ 
+return (List<CabBooking>) r.findAll();   
+}  
+public String cancel(int cabId) { 
+r.deleteById((long) cabId); 
+return "deleted"; 
+}   
+} 
+Controller.java 
+package com.infy.controller; 
+import org.springframework.core.env.Environment; 
+import java.util.List; 
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.http.HttpStatus; 
+import org.springframework.http.ResponseEntity; 
+76 
+77 
+ 
+import org.springframework.web.bind.annotation.DeleteMapping; 
+import org.springframework.web.bind.annotation.GetMapping; 
+import org.springframework.web.bind.annotation.PathVariable; 
+import org.springframework.web.bind.annotation.PostMapping; 
+import org.springframework.web.bind.annotation.RequestBody; 
+import org.springframework.web.bind.annotation.RequestMapping; 
+import org.springframework.web.bind.annotation.RestController; 
+import com.infy.domain.CabBooking; 
+import com.infy.dto.CabBookingDTO; 
+import com.infy.service.CabBookingServiceImpl; 
+ 
+@RestController 
+@RequestMapping("/cab") 
+public class Controller { 
+  
+ @Autowired  
+ CabBookingServiceImpl s; 
+  
+ @Autowired 
+ Environment evn; 
+  
+ @PostMapping 
+ public ResponseEntity<String> bookCab(@RequestBody CabBookingDTO cabBookingDTO){ 
+  String add=(String) s.insert(cabBookingDTO); 
+  String r=evn.getProperty("message1")+" "+add; 
+  return new ResponseEntity<>(r,HttpStatus.CREATED);   
+ } 
+  
+   
+ @GetMapping("/{cabPhoneNo}") 
+    public ResponseEntity<List<CabBooking>> getBookingDetails(@PathVariable Long cabPhoneNo) { 
+       List<CabBooking> booking = s.fetch(cabPhoneNo); 
+        return new ResponseEntity<>(booking, HttpStatus.OK); 
+    }  
+ @DeleteMapping("/{cabId}") 
+  public ResponseEntity<String> cancelBooking(@PathVariable int cabId) { 
+        s.cancel(cabId); 
+        String msg = evn.getProperty("message2"); 
+        return new ResponseEntity<>(msg, HttpStatus.OK); 
+    } 
+}  
+ 
+App.java 
+package com.infy; 
+ 
+import org.springframework.boot.SpringApplication; 
+import org.springframework.boot.autoconfigure.SpringBootApplication; 
+@SpringBootApplication 
+public class App { 
+public static void main(String[] args) { 
+SpringApplication.run(App.class, args); 
+} 
+} 
+application.properties 
+spring.application.name=CabBooking  
+spring.application.name=my-spring-boot-app 
+spring.datasource.url=jdbc:mysql://localhost:3306/cab 
+spring.datasource.username=root 
+spring.jpa.hibernate.ddl-auto=update 
+spring.jpa.show-sql=true 
+server.port=9090 
+server.servlet.context-path=/gpt 
+message1=Cab booked successfully 
+message2=cab is successfully canceled 
+➔ Run The Application: 
+o Open xampp , start Apache  and MySql server .  
+o Create a database named cab in MySQL. 
+o Add  ‘Spring Data Jpa”  (To work with JPA repositories and database) , “MySql Driver”  
+and “Spring Web”(To build REST APIs or run Spring Boot applications.) 
+dependencies while creating a maven project using spring initializr . 
+o Run the App class as a Java Application (right-click > Run As > Java Application). 
+o Open Postman 
+Download from: https://www.postman.com/downloads 
+o Use the correct URL & HTTP Methods 
+o Your base URL is: 
+http://localhost:9090/gpt/cab/124 
+o Now use different HTTP methods for each operation: 

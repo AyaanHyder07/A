@@ -1,0 +1,176 @@
+ 14.Implement Constructor Injection ,For the Employee Management scenario, create a Spring 
+Java configuration to maintain Employee details such as employee id, employee name, and 
+department and perform the following database operations. 
+• Insert a new employee details 
+• Remove employee details based on employee id 
+• Search all employee 
+ 
+EmployeeDTO.java 
+// EmployeeDTO.java 
+package com.infy.Service; 
+public class EmployeeDTO { 
+    private int empId; 
+    private String empName; 
+    private String empDepartment; 
+ 
+    public EmployeeDTO() {} 
+    public EmployeeDTO(int empId, String empName, String empDepartment) { 
+        this.empId = empId; 
+        this.empName = empName; 
+        this.empDepartment = empDepartment; 
+    } 
+    public int getEmpId() { 
+        return empId; 
+    } 
+    public void setEmpId(int empId) { 
+        this.empId = empId; 
+    } 
+    public String getEmpName() { 
+        return empName; 
+    } 
+    public void setEmpName(String empName) { 
+        this.empName = empName; 
+    } 
+    public String getEmpDepartment() { 
+        return empDepartment; 
+    } 
+    public void setEmpDepartment(String empDepartment) { 
+        this.empDepartment = empDepartment; 
+    } 
+    @Override 
+    public String toString() { 
+        return "empID: " + empId + 
+               " empName: " + empName + 
+               " empDepartment: " + empDepartment; 
+    } 
+29 
+ 
+} 
+ 
+EmployeeRepository.java 
+// EmployeeRepository.java 
+package com.infy.Service; 
+import java.util.List; 
+public interface EmployeeRepository { 
+    public void insertEmployee(EmployeeDTO emp); 
+    public void removeEmployee(int empId); 
+    List<EmployeeDTO> fetchCustomers(); 
+} 
+ 
+EmployeeRepositoryImpl.java 
+package com.infy.Service; 
+import java.util.List; 
+import java.util.ArrayList; 
+import jakarta.annotation.PostConstruct; 
+ 
+public class EmployeeRepositoryImpl implements EmployeeRepository { 
+List<EmployeeDTO> employees = null; 
+    @PostConstruct 
+    public void initializer() { 
+        EmployeeDTO employeeDTO = new EmployeeDTO(); 
+        employeeDTO.setEmpId(101); 
+        employeeDTO.setEmpName("Sujata"); 
+        employeeDTO.setEmpDepartment("CSE"); 
+        employees = new ArrayList<>(); 
+        employees.add(employeeDTO); 
+    } 
+    @Override 
+    public void insertEmployee(EmployeeDTO emp) { 
+        employees.add(emp); 
+    } 
+    @Override 
+    public void removeEmployee(int empId) { 
+        if (employees == null) return; 
+        employees.removeIf(emp -> emp.getEmpId() == empId); 
+    } 
+    @Override 
+    public List<EmployeeDTO> fetchCustomers() { 
+        return employees; 
+    } 
+} 
+EmployeeService.java 
+package com.infy.Service; 
+30 
+ 
+ 
+import java.util.List; 
+ 
+public interface EmployeeService { 
+    public void insert(EmployeeDTO emp); 
+    public void delete(int empId); 
+    List<EmployeeDTO> getAllCustomer(); 
+} 
+ 
+EmployeeServiceImpl.java 
+ 
+package com.infy.Service; 
+import java.util.List; 
+public class EmployeeServiceImpl implements EmployeeService { 
+    private EmployeeRepository employeeDAO; 
+ 
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository) { 
+        this.employeeDAO = employeeRepository; 
+    } 
+    @Override 
+    public void insert(EmployeeDTO emp) { 
+        employeeDAO.insertEmployee(emp); 
+    } 
+    @Override 
+    public void delete(int empId) { 
+        employeeDAO.removeEmployee(empId); 
+    } 
+ 
+    @Override 
+    public List<EmployeeDTO> getAllCustomer() { 
+        return employeeDAO.fetchCustomers(); 
+    } 
+} 
+SpringConfiguration.java 
+package com.infy.Service; 
+import org.springframework.context.annotation.Bean; 
+import org.springframework.context.annotation.Configuration; 
+ 
+@Configuration 
+public class SpringConfiguration { 
+    @Bean 
+    public EmployeeRepositoryImpl employeeRepository() { 
+        return new EmployeeRepositoryImpl(); 
+    } 
+    @Bean 
+31 
+ 
+    public EmployeeServiceImpl employeeService() { 
+        return new EmployeeServiceImpl(employeeRepository()); 
+    } 
+} 
+ 
+App.java 
+package com.infy; 
+import com.infy.Service.*; 
+import java.util.List; 
+import java.util.ArrayList; 
+import org.springframework.context.support.AbstractApplicationContext; 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext; 
+ 
+public class App { 
+    public static void main(String[] args) { 
+        AbstractApplicationContext context = 
+                new AnnotationConfigApplicationContext(SpringConfiguration.class); 
+        EmployeeService service = (EmployeeService) context.getBean("employeeService"); 
+        service.insert(new EmployeeDTO(103, "Sneha", "CS")); 
+        service.insert(new EmployeeDTO(104, "John", "EEE")); 
+        service.insert(new EmployeeDTO(105, "Kevin", "IT")); 
+        service.delete(101); 
+        service.delete(102); 
+ 
+        List<EmployeeDTO> empList = new ArrayList<>(); 
+        empList = service.getAllCustomer(); 
+        for (EmployeeDTO e : empList) { 
+            System.out.println(e); 
+        } 
+        context.close(); 
+    } 
+} 
+Output : empID: 103 empName: Sneha empDepartment: CS 
+empID: 104 empName: John empDepartment: EEE 
+empID: 105 empName: Kevin empDepartment: IT 

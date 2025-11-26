@@ -1,0 +1,48 @@
+20. Create a Spring Boot REST controller with endpoint /greet that returns a welcome 
+message including the current day of the week (e.g., “WELCOME TO TUESDAY SALE!!”). 
+=> 
+controller.java 
+package com.gpt.controller; 
+import java.time.DayOfWeek; 
+import java.time.LocalDate; 
+import org.springframework.web.bind.annotation.GetMapping; 
+import org.springframework.web.bind.annotation.RequestMapping; 
+import org.springframework.web.bind.annotation.RestController; 
+@RestController 
+@RequestMapping("/greet") 
+public class Controller { 
+@GetMapping 
+public String fecthStudent() { 
+LocalDate today=LocalDate.now(); 
+DayOfWeek day=today.getDayOfWeek(); 
+return "WELCOME TO"+ day +"SALE!!"; 
+} 
+} 
+App.java 
+package com.gpt; 
+import org.springframework.boot.SpringApplication; 
+import org.springframework.boot.autoconfigure.SpringBootApplication; 
+@SpringBootApplication 
+public class App { 
+public static void main(String[] args) { 
+SpringApplication.run(App.class, args); 
+} 
+} 
+application.properties 
+spring.application.name=project1 
+server.port=9090 
+server.servlet.context-path=/gpt 
+50 
+➔ Run The Application: 
+o Add  ‘Spring Web”(To build REST APIs or run Spring Boot applications.) 
+while creating a maven project using spring initializr . 
+o Run the App class as a Java Application (right-click > Run As > Java Application). 
+o Open Postman 
+Download from: https://www.postman.com/downloads 
+o Use the correct URL & HTTP Methods 
+o Your base URL is: 
+http://localhost:9090/gpt/student 
+o Now use different HTTP methods for each operation: 
+OUTPUT: 
+GET->http://localhost:9090/gpt/greet 
+WELCOME TOTUESDAYSALE!! 

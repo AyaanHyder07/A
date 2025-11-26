@@ -1,0 +1,252 @@
+26.Create a Spring Boot app managing Student details with MongoDB which Supports 
+CRUD operations via REST endpoints. 
+ 
+Student.java 
+package com.gpt.domain; 
+ 
+import org.springframework.data.annotation.Id; 
+import org.springframework.data.mongodb.core.mapping.Document; 
+import com.gpt.dto.StudentDTO; 
+ 
+@Document(collection = "student") 
+public class Student { 
+    @Id 
+    private Integer studentId; 
+    private String studentName; 
+    private String studentCourse; 
+ 
+    public Student() {} 
+ 
+    public Student(Integer studentId, String studentName, String studentCourse) { 
+        this.studentId = studentId; 
+        this.studentName = studentName; 
+        this.studentCourse = studentCourse; 
+    } 
+ 
+    // Getters and Setters 
+    public Integer getStudentId() { 
+        return studentId; 
+    } 
+    public void setStudentId(Integer studentId) { 
+        this.studentId = studentId; 
+    } 
+    public String getStudentName() { 
+        return studentName; 
+    } 
+    public void setStudentName(String studentName) { 
+        this.studentName = studentName; 
+    } 
+    public String getStudentCourse() { 
+        return studentCourse; 
+    } 
+81 
+ 
+    public void setStudentCourse(String studentCourse) { 
+        this.studentCourse = studentCourse; 
+    } 
+ 
+    public static StudentDTO convertEntityToDto(Student student) { 
+        return new StudentDTO( 
+            student.getStudentId(), 
+            student.getStudentName(), 
+            student.getStudentCourse() 
+        ); 
+    } 
+ 
+    @Override 
+    public String toString() { 
+        return "Student [studentId=" + studentId + 
+                ", studentName=" + studentName + 
+                ", studentCourse=" + studentCourse + "]"; 
+    } 
+} 
+ 
+StudentDTO.java 
+package com.gpt.dto; 
+ 
+import com.gpt.domain.Student; 
+ 
+public class StudentDTO { 
+    private Integer studentId; 
+    private String studentName; 
+    private String studentCourse; 
+ 
+    public StudentDTO() {} 
+ 
+    public StudentDTO(Integer studentId, String studentName, String studentCourse) { 
+        this.studentId = studentId; 
+        this.studentName = studentName; 
+        this.studentCourse = studentCourse; 
+    } 
+ 
+    // Getters and Setters 
+    public Integer getStudentId() { 
+        return studentId; 
+82 
+ 
+    } 
+    public void setStudentId(Integer studentId) { 
+        this.studentId = studentId; 
+    } 
+    public String getStudentName() { 
+        return studentName; 
+    } 
+    public void setStudentName(String studentName) { 
+        this.studentName = studentName; 
+    } 
+    public String getStudentCourse() { 
+        return studentCourse; 
+    } 
+    public void setStudentCourse(String studentCourse) { 
+        this.studentCourse = studentCourse; 
+    } 
+ 
+    public static Student convertDtoToEntity(StudentDTO studentDTO) { 
+        return new Student( 
+            studentDTO.getStudentId(), 
+            studentDTO.getStudentName(), 
+            studentDTO.getStudentCourse() 
+        ); 
+    } 
+} 
+ 
+StudentRepository.java 
+package com.gpt.repository; 
+import org.springframework.data.mongodb.repository.MongoRepository; 
+import com.gpt.domain.Student; 
+ 
+public interface StudentRepository extends MongoRepository<Student, Integer> { 
+} 
+ 
+StudentService.java 
+package com.gpt.service; 
+ 
+import java.util.List; 
+import com.gpt.dto.StudentDTO; 
+ 
+public interface StudentService { 
+83 
+ 
+    String insertRecord(StudentDTO studentDTO); 
+    List<StudentDTO> getAllRecord(); 
+    String deleteRecord(Integer studentId);  
+    String updateRecord(Integer studentId, String newName); 
+} 
+ 
+StudentServiceImpl.java 
+package com.gpt.service; 
+ 
+import java.util.ArrayList; 
+import java.util.List; 
+import java.util.Optional; 
+ 
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.stereotype.Service; 
+ 
+import com.gpt.domain.Student; 
+import com.gpt.dto.StudentDTO; 
+import com.gpt.repository.StudentRepository; 
+ 
+@Service 
+public class StudentServiceImpl implements StudentService { 
+ 
+    @Autowired 
+    private StudentRepository studentRepository; 
+ 
+    @Override 
+    public String insertRecord(StudentDTO studentDTO) { 
+        studentRepository.save(StudentDTO.convertDtoToEntity(studentDTO)); 
+        return "Student with ID " + studentDTO.getStudentId() + " added successfully!"; 
+    } 
+ 
+    @Override 
+    public List<StudentDTO> getAllRecord() { 
+        List<Student> students = studentRepository.findAll(); 
+        List<StudentDTO> dtoList = new ArrayList<>(); 
+ 
+        for (Student student : students) { 
+            dtoList.add(Student.convertEntityToDto(student)); 
+        } 
+        return dtoList; 
+84 
+ 
+    } 
+ 
+    @Override 
+ 
+ public String deleteRecord(Integer studentId) { 
+     studentRepository.deleteById(studentId); 
+   return "student with"+studentId+"deleted"; 
+ } 
+  
+ public String updateRecord(Integer  studentId,String newName) { 
+  Optional<Student> optional = studentRepository.findById(studentId); 
+  Student std=optional.get(); 
+  std.setStudentName(newName);  
+  studentRepository.save(std);   
+     return "The customer with id"+studentId+"has been updated 
+successfully"; 
+ } 
+ 
+} 
+ 
+StudentController.java 
+package com.gpt.controller; 
+ 
+import java.util.List; 
+ 
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.web.bind.annotation.*; 
+ 
+import com.gpt.dto.StudentDTO; 
+import com.gpt.service.StudentService; 
+ 
+@RestController 
+@RequestMapping("/student") 
+public class StudentController { 
+ 
+    @Autowired  
+    private StudentService studentService; 
+ 
+    @PostMapping 
+    public String addStudent(@RequestBody StudentDTO studentDTO) { 
+        return studentService.insertRecord(studentDTO); 
+85 
+ 
+    } 
+ 
+    @GetMapping 
+    public List<StudentDTO> getAllStudents() { 
+        return studentService.getAllRecord(); 
+    }  
+ 
+    @DeleteMapping("/{studentId}") 
+    public String deleteStudent(@PathVariable Integer studentId) { 
+        return studentService.deleteRecord(studentId); 
+    }  
+ 
+    @PutMapping("/{studentId}") 
+    public String updateStudentName(@PathVariable Integer studentId, @RequestBody String 
+newName) { 
+        return studentService.updateRecord(studentId, newName); 
+    } 
+} 
+App.java 
+package com.infy; 
+ 
+import org.springframework.boot.SpringApplication; 
+import org.springframework.boot.autoconfigure.SpringBootApplication; 
+ 
+@SpringBootApplication 
+public class App { 
+ 
+ public static void main(String[] args) { 
+  SpringApplication.run(AssociationApplication.class, args); 
+ } 
+} 
+ 
+application.properties 
+spring.application.name=demo1 
+spring.data.mongodb.uri=mongodb://localhost:27017/mongoDB 
+server.port=9090 
+server.servlet.context-path=/gpt  

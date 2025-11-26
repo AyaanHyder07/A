@@ -1,0 +1,201 @@
+22.One-to-One Mapping Between Student and Book Using Spring Boot JPA. 
+ 
+App.js 
+package com.infy; 
+ 
+import java.util.Arrays; 
+import java.util.List; 
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.boot.CommandLineRunner; 
+import org.springframework.boot.SpringApplication; 
+import org.springframework.boot.autoconfigure.SpringBootApplication; 
+import com.infy.Entity.Book; 
+import com.infy.Entity.Student; 
+import com.infy.repo.StudentRepo; 
+ 
+@SpringBootApplication 
+public class App implements CommandLineRunner { 
+ 
+    @Autowired 
+    private StudentRepo sr; 
+ 
+    public static void main(String[] args) { 
+        SpringApplication.run(App.class, args); 
+    } 
+ 
+    @Override 
+    public void run(String... args) throws Exception { 
+        // Create one-to-one mappings 
+        Student s1 = new Student(101, "John", new Book(1, "learningWithPython", "Python Basics")); 
+        Student s2 = new Student(102, "Ram", new Book(2, "java", "Java Fundamentals")); 
+        Student s3 = new Student(103, "Sanvi", new Book(3, "ds", "Data Structures")); 
+        Student s4 = new Student(104, "Laxmi", new Book(4, "html", "Web Design")); 
+ 
+        sr.saveAll(Arrays.asList(s1, s2, s3, s4)); 
+ 
+        List<Student> sList = sr.findAll(); 
+        for (Student s : sList) 
+            System.out.println(s); 
+    } 
+} 
+ 
+ 
+58 
+ 
+Book.js 
+package com.infy.Entity; 
+import jakarta.persistence.Entity; 
+import jakarta.persistence.Id; 
+import jakarta.persistence.OneToOne; 
+ 
+@Entity 
+public class Book { 
+ 
+    @Id 
+    private Integer bookId; 
+    private String title; 
+    private String bookName; 
+ 
+    @OneToOne(mappedBy = "book") // optional for bidirectional 
+    private Student student; 
+ 
+    public Book() {} 
+ 
+    public Book(Integer bookId, String title, String bookName) { 
+        this.bookId = bookId; 
+        this.title = title; 
+        this.bookName = bookName; 
+    } 
+ 
+    public Integer getBookId() { 
+        return bookId; 
+    } 
+ 
+    public void setBookId(Integer bookId) { 
+        this.bookId = bookId; 
+    } 
+ 
+    public String getTitle() { 
+        return title; 
+    } 
+ 
+    public void setTitle(String title) { 
+        this.title = title; 
+    } 
+ 
+    public String getBookName() { 
+        return bookName; 
+    } 
+59 
+ 
+ 
+    public void setBookName(String bookName) { 
+        this.bookName = bookName; 
+    } 
+ 
+    public Student getStudent() { 
+        return student; 
+    } 
+ 
+    public void setStudent(Student student) { 
+        this.student = student; 
+    } 
+ 
+    @Override 
+    public String toString() { 
+        return "Book [bookId=" + bookId + ", title=" + title + ", bookName=" + bookName + "]"; 
+    } 
+} 
+ 
+Student.js 
+package com.infy.Entity; 
+ 
+import jakarta.persistence.CascadeType; 
+import jakarta.persistence.Entity; 
+import jakarta.persistence.Id; 
+import jakarta.persistence.JoinColumn; 
+import jakarta.persistence.OneToOne; 
+ 
+@Entity 
+public class Student { 
+    @Id 
+    private Integer studentId; 
+    private String studentName; 
+ 
+    @OneToOne(cascade = CascadeType.ALL) 
+    @JoinColumn(name = "book_id") // foreign key column in student table 
+    private Book book; 
+ 
+    public Student() {} 
+ 
+    public Student(Integer studentId, String studentName, Book book) { 
+        this.studentId = studentId; 
+        this.studentName = studentName; 
+        this.book = book; 
+60 
+ 
+    } 
+ 
+    public Integer getStudentId() { 
+        return studentId; 
+    } 
+ 
+    public void setStudentId(Integer studentId) { 
+        this.studentId = studentId; 
+    } 
+ 
+    public String getStudentName() { 
+        return studentName; 
+    } 
+ 
+    public void setStudentName(String studentName) { 
+        this.studentName = studentName; 
+    } 
+ 
+    public Book getBook() { 
+        return book; 
+    } 
+ 
+    public void setBook(Book book) { 
+        this.book = book; 
+    } 
+ 
+    @Override 
+    public String toString() { 
+        return "Student [studentId=" + studentId + ", studentName=" + studentName + ", book=" + book 
++ "]"; 
+    } 
+} 
+ 
+BookRepo.js 
+package com.infy.repo; 
+ 
+import org.springframework.data.jpa.repository.JpaRepository; 
+import org.springframework.stereotype.Repository; 
+import com.infy.Entity.Book; 
+ 
+@Repository 
+public interface BookRepo extends  JpaRepository<Book,Integer>{ 
+} 
+ 
+StudentRepo.js 
+package com.infy.repo; 
+import org.springframework.data.jpa.repository.JpaRepository; 
+import org.springframework.stereotype.Repository; 
+import com.infy.Entity.Student; 
+@Repository 
+public interface StudentRepo extends JpaRepository<Student,Integer>{ 
+} 
+Application.properties 
+spring.application.name=OneToOne 
+spring.datasource.url=jdbc:mysql://localhost:3306/stdBook 
+spring.datasource.username=root 
+spring.jpa.hibernate.ddl-auto=update 
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver 
+spring.jpa.show-sql: true 
+➔ Run The Application: 
+o Open xampp , start Apache  and MySql server .  
+o Create a database named stdBook in MySQL. 
+o Add  ‘Spring Data Jpa”  (To work with JPA repositories and database) and “MySql 
+Driver” dependencies while creating a maven project using spring initializr . 
+o Run the App class as a Java Application (right-click > Run As > Java Application). 
